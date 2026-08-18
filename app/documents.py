@@ -27,6 +27,12 @@ SAMPLE_DOCUMENTS = [
         "content": "입사 첫 주에는 사내 계정 발급, 장비 수령, 필수 교육 이수를 완료해야 합니다.",
         "category": "HR",
     },
+    { 
+        "id": 5, 
+        "title": "법인카드 사용 지침", 
+        "content": "법인카드는 업무 목적 지출에만 사용하며, 사용 후 3일 내 영수증을 제출합니다.", 
+        "category": "Finance",
+    },
 ]
 
 def find_document_by_id(documents, doc_id):
