@@ -27,3 +27,9 @@ class Document:
     def __repr__(self):
         # __repr__ - 이 객체를 print()하거나 화면에 출력할 때 보여줄 문자열을 정하는 특별한 메서드
         return f"Document(id={self.id}, title={self.title!r}, category={self.category!r})"
+
+    def summary(self, length=20):
+        # content가 length자보다 길면 잘라서 "..."를 붙이고, 아니면 그대로 반환 (L03에서 배운 if 재사용)
+        if len(self.content) > length:
+            return self.content[:length] + "..."   # 슬라이싱(L04)으로 앞부분만 잘라냄
+        return self.content

@@ -52,6 +52,11 @@ def find_documents_by_category(documents, category):
             matched.append(doc)
     return matched
 
+def summary(self, length=20):
+    # content가 length자보다 길면 잘라서 "..."를 붙이고, 아니면 그대로 반환 (L03에서 배운 if 재사용)
+    if len(self.content) > length:
+        return self.content[:length] + "..."   # 슬라이싱(L04)으로 앞부분만 잘라냄
+    return self.content
 
 if __name__ == "__main__":
     print(f"[문서 확인] 도메인: {DOCUMENT_DOMAIN}")
@@ -69,3 +74,6 @@ if __name__ == "__main__":
         if not document.is_long_enough():   # 이제 함수가 아니라 문서 스스로가 판단하는 메서드 호출
             print(f"[경고] '{document.title}' 문서가 최소 길이보다 짧습니다.")
     print("[문서 확인] 모든 문서 길이 점검 완료")
+    
+    for document in SAMPLE_DOCUMENTS:
+        print(f"[요약]{document.title}:{document.summary()}")
