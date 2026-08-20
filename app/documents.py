@@ -1,5 +1,7 @@
 # 상수와 샘플 문서 데이터 
-MIN_DOCUMENT_LENGTH = 10 # config.py와 동일한 최소 문서 길이 기준
+# MIN_DOCUMENT_LENGTH = 10 # config.py와 동일한 최소 문서 길이 기준
+
+from app.config import DOCUMENT_DOMAIN, MIN_DOCUMENT_LENGTH
 
 # 문서가 여러 건이므로 바깥은 list로 감싸고, 문서 한 건은 여러 필드를 가지므로 dict로 표현
 SAMPLE_DOCUMENTS = [
@@ -72,6 +74,7 @@ def is_document_long_enough(doc, minimum=MIN_DOCUMENT_LENGTH):
 
 
 if __name__ == "__main__":
+    print(f"[문서 확인] 도메인: {DOCUMENT_DOMAIN}") # 추가 
     print(f"[문서 확인] 전체 문서 수: {len(SAMPLE_DOCUMENTS)}건")
     print(f"[문서 확인] 제목 목록: {list_titles(SAMPLE_DOCUMENTS)}")
 
