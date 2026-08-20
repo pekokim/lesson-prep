@@ -1,12 +1,19 @@
 from app.config import MIN_DOCUMENT_LENGTH   # L05에서 정리한 대로, 설정값은 config.py에서 가져와 재사용
+from app.exceptions import DocumentValidationError
 
 
 class Document:
     """캡스톤 프로젝트에서 문서 한 건을 표현하는 클래스 (L04·L05의 dict 표현을 대체)."""
 
     def __init__(self, id, title, content, category):
-        # __init__ - Document(...)를 호출해 인스턴스를 만드는 순간 자동으로 실행되는 특별한 메서드
-        self.id = id            # self.xxx = 값 -> 이 인스턴스만의 값(인스턴스 속성)으로 저장
+        if not title:                                     # title이 빈 문자열("")이면 not title이 True
+            raise DocumentValidationError("title은 빈 문자열일 수 없습니다.")   # raise - 예외를 직접 발생시킴
+        if len(content) < MIN_DOCUMENT_LENGTH:              # config.py의 기준보다 짧으면 유효하지 않은 문서
+            raise DocumentValidationError(
+                f"content는 최소{MIN_DOCUMENT_LENGTH}자 이상이어야 합니다 (현재{len(content)}자)."
+            )
+
+        self.id = id
         self.title = title
         self.content = content
         self.category = category

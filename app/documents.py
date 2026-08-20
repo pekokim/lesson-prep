@@ -3,6 +3,8 @@
 
 from app.config import DOCUMENT_DOMAIN, MIN_DOCUMENT_LENGTH
 from app.models import Document
+from app.exceptions import DocumentNotFoundError
+from app.decorators import log_call
 
 # 문서가 여러 건이므로 바깥은 list로 감싸고, 문서 한 건은 여러 필드를 가지므로 dict로 표현
 SAMPLE_DOCUMENTS = [
@@ -12,12 +14,13 @@ SAMPLE_DOCUMENTS = [
     Document(4, "신규 입사자 온보딩 체크리스트", "입사 첫 주에는 사내 계정 발급, 장비 수령, 필수 교육 이수를 완료해야 합니다.", "HR"),
 ]
 
+@log_call   # @데코레이터이름 - def 바로 위에 붙이면 "이 함수 = log_call(이 함수)"와 같은 뜻
 def find_document_by_id(documents, doc_id):
-    # id가 일치하는 Document 하나를 찾아 반환, 없으면 None (dict의 doc["id"] 대신 doc.id로 접근)
+    # id가 일치하는 Document를 찾아 반환, 없으면 DocumentNotFoundError를 발생시킴 (예전에는 None을 반환했음)
     for doc in documents:
         if doc.id == doc_id:
             return doc
-    return None
+    raise DocumentNotFoundError(doc_id)   # raise - 여기서 예외를 직접 발생시켜 "찾지 못했다"는 상황을 알림
 
 
 def list_titles(documents):
@@ -52,11 +55,6 @@ def find_documents_by_category(documents, category):
             matched.append(doc)
     return matched
 
-def summary(self, length=20):
-    # content가 length자보다 길면 잘라서 "..."를 붙이고, 아니면 그대로 반환 (L03에서 배운 if 재사용)
-    if len(self.content) > length:
-        return self.content[:length] + "..."   # 슬라이싱(L04)으로 앞부분만 잘라냄
-    return self.content
 
 if __name__ == "__main__":
     print(f"[문서 확인] 도메인: {DOCUMENT_DOMAIN}")
@@ -67,6 +65,12 @@ if __name__ == "__main__":
     found = find_document_by_id(SAMPLE_DOCUMENTS, 2)
     print(f"[문서 확인] id=2 문서: {found}")
 
+    try:
+        find_document_by_id(SAMPLE_DOCUMENTS, 999)      # 존재하지 않는 id -> DocumentNotFoundError 발생
+    except DocumentNotFoundError as error:               # 그 예외를 여기서 잡아서 프로그램이 멈추지 않게 처리
+        print(f"[문서 확인] 예상된 에러 처리:{error}")
+
+
     print(f"[문서 확인] 카테고리 종류: {get_unique_categories(SAMPLE_DOCUMENTS)}")
     print(f"[문서 확인] 카테고리별 개수: {count_by_category(SAMPLE_DOCUMENTS)}")
 
@@ -74,6 +78,6 @@ if __name__ == "__main__":
         if not document.is_long_enough():   # 이제 함수가 아니라 문서 스스로가 판단하는 메서드 호출
             print(f"[경고] '{document.title}' 문서가 최소 길이보다 짧습니다.")
     print("[문서 확인] 모든 문서 길이 점검 완료")
-    
+
     for document in SAMPLE_DOCUMENTS:
         print(f"[요약]{document.title}:{document.summary()}")
