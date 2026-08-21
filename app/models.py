@@ -1,18 +1,13 @@
 from app.config import MIN_DOCUMENT_LENGTH   # L05에서 정리한 대로, 설정값은 config.py에서 가져와 재사용
-from app.exceptions import DocumentValidationError
+# (C04L01 정리) 값 검증은 이제 schemas.py의 DocumentCreate가 "입력 경계"에서 담당하므로,
+# Document는 이미 검증된 값만 받는다고 신뢰하고 별도 검증 없이 그대로 저장합니다.
+# from app.exceptions import DocumentValidationError
 
 
 class Document:
     """캡스톤 프로젝트에서 문서 한 건을 표현하는 클래스 (L04·L05의 dict 표현을 대체)."""
 
     def __init__(self, id, title, content, category):
-        if not title:                                     # title이 빈 문자열("")이면 not title이 True
-            raise DocumentValidationError("title은 빈 문자열일 수 없습니다.")   # raise - 예외를 직접 발생시킴
-        if len(content) < MIN_DOCUMENT_LENGTH:              # config.py의 기준보다 짧으면 유효하지 않은 문서
-            raise DocumentValidationError(
-                f"content는 최소{MIN_DOCUMENT_LENGTH}자 이상이어야 합니다 (현재{len(content)}자)."
-            )
-
         self.id = id
         self.title = title
         self.content = content

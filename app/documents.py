@@ -1,9 +1,10 @@
 # 상수와 샘플 문서 데이터 
 # MIN_DOCUMENT_LENGTH = 10 # config.py와 동일한 최소 문서 길이 기준
-
+from pydantic import ValidationError
 from app.config import DOCUMENT_DOMAIN, MIN_DOCUMENT_LENGTH
 from app.models import Document
-from app.exceptions import DocumentNotFoundError
+from app.schemas import DocumentCreate
+from app.exceptions import DocumentNotFoundError, DocumentValidationError
 from app.decorators import log_call
 
 # 문서가 여러 건이므로 바깥은 list로 감싸고, 문서 한 건은 여러 필드를 가지므로 dict로 표현
@@ -13,6 +14,16 @@ SAMPLE_DOCUMENTS = [
     Document(3, "출장비 정산 가이드", "출장비는 영수증을 첨부해 정산 시스템에 등록하면 익월 급여와 함께 지급됩니다.", "Finance"),
     Document(4, "신규 입사자 온보딩 체크리스트", "입사 첫 주에는 사내 계정 발급, 장비 수령, 필수 교육 이수를 완료해야 합니다.", "HR"),
 ]
+
+def create_document(raw_data, doc_id):
+    # raw_data(dict)를 DocumentCreate로 먼저 검증한 뒤, 통과하면 Document 인스턴스를 만들어 반환
+    try:
+        validated = DocumentCreate(**raw_data)   # **raw_data - dict의 key들을 그대로 키워드 인자로 펼쳐서 전달
+    except ValidationError as error:
+        # Pydantic의 ValidationError를 그대로 밖으로 내보내지 않고, 우리 프로젝트의 커스텀 예외로 감싸서 다시 발생
+        raise DocumentValidationError(str(error))
+    return Document(doc_id, validated.title, validated.content, validated.category)
+
 
 @log_call   # @데코레이터이름 - def 바로 위에 붙이면 "이 함수 = log_call(이 함수)"와 같은 뜻
 def find_document_by_id(documents, doc_id):
@@ -61,6 +72,18 @@ if __name__ == "__main__":
     print(f"[문서 확인] 전체 문서 수: {len(SAMPLE_DOCUMENTS)}건")
     print(f"[문서 확인] 문서 목록(Document.__repr__로 출력): {SAMPLE_DOCUMENTS}")
     print(f"[문서 확인] 제목 목록: {list_titles(SAMPLE_DOCUMENTS)}")
+
+    new_doc = create_document(
+        {"title": "법인카드 사용 지침", "content": "법인카드는 업무 목적 지출에만 사용합니다.", "category": "Finance"},
+        doc_id=5,
+    )
+    print(f"[문서 확인] 새로 생성된 문서:{new_doc}")
+
+    try:
+        create_document({"title": "", "content": "짧음", "category": "HR"}, doc_id=6)   # title 빈 문자열 + content 너무 짧음
+    except DocumentValidationError as error:
+        print(f"[문서 확인] 예상된 검증 에러:{error}")
+
 
     found = find_document_by_id(SAMPLE_DOCUMENTS, 2)
     print(f"[문서 확인] id=2 문서: {found}")
